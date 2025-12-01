@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Твоя Затишна Хмаринка ☁️</title>
+    <style>
+        /* === ЗМІННІ ТА ОСНОВНІ СТИЛІ === */
+        :root {
+            --primary-color: #f7a7c7; /* Ніжно-рожевий */
+            --secondary-color: #cbaacb; /* Пастельно-фіолетовий */
+            --text-color: #4a4a68; /* Темно-фіолетовий для тексту */
+            --bg-light: #fff8f8; /* Дуже світлий фон */
+            --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition-duration: 0.5s;
+        }
+
+        /* Загальний скид стилів та встановлення шрифту */
+        body {
+            font-family: 'Arial', sans-serif; /* Використовуємо системний шрифт для мобільності */
+            background-color: var(--bg-light);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            overflow: hidden; /* Запобігає прокручуванню */
+            transition: background-color var(--transition-duration) ease-in-out;
+            touch-action: manipulation; /* Покращення взаємодії на мобільному */
+        }
+
+        /* Основний контейнер для Portrait */
+        #main-content {
+            padding: 20px;
+            max-width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            opacity: 1;
+            transition: opacity var(--transition-duration) ease-in-out, transform var(--transition-duration) ease-in-out;
+            will-change: opacity, transform;
+        }
+
+        /* Стилі для заголовка */
+        h1 {
+            font-size: 1.8em;
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--text-color);
+            margin-bottom: 0;
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Стилі для кнопок */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: var(--shadow-soft);
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+
+        .action-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ефект світіння на кнопках */
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.7s ease;
+            border-radius: 50%;
+            z-index: 0;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        .action-button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0;
+        }
+
+        /* === МІНІ-СЦЕНА (ОБРОБКА НАТИСКАННЯ) === */
+        #response-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.1); /* М'яке затемнення */
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-duration) ease-in-out, visibility var(--transition-duration) ease-in-out;
+            z-index: 100;
+        }
+
+        #response-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .response-box {
+            background-color: var(--bg-light);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: var(--shadow-soft);
+            max-width: 80%;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform var(--transition-duration) ease-out, opacity var(--transition-duration) ease-out;
+        }
+
+        #response-screen.active .response-box {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        #response-text {
+            font-size: 1.3em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            white-space: pre-wrap; /* Зберігаємо переноси рядків */
+        }
+
+        #back-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: var(--shadow-soft);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        /* === ПАСХАЛКА LANDSCAPE === */
+        #landscape-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-duration) ease-in-out, visibility var(--transition-duration) ease-in-out;
+            text-align: center;
+            font-size: 1.5em;
+            line-height: 1.5;
+            z-index: 110;
+        }
+
+        #landscape-message.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* === КЛЮЧОВІ АНІМАЦІЇ === */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .initial-fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Анімація для кнопок при завантаженні */
+        .action-button:nth-child(1) { animation: fadeIn 1s ease-out 0.3s backwards; }
+        .action-button:nth-child(2) { animation: fadeIn 1s ease-out 0.6s backwards; }
+        .action-button:nth-child(3) { animation: fadeIn 1s ease-out 0.9s backwards; }
+
+        /* Додаткові ефекти */
+        .glow {
+            box-shadow: 0 0 15px var(--primary-color), 0 0 30px var(--secondary-color);
+            animation: pulseGlow 3s infinite alternate;
+        }
+        
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px rgba(247, 167, 199, 0.7); }
+            to { box-shadow: 0 0 20px rgba(203, 170, 203, 0.8), 0 0 40px rgba(247, 167, 199, 0.5); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-content">
+        <h1 class="initial-fade-in">
+            Моя маленькая миленькая Владиславочка, что сейчас тебя привело ко мне? 💖
+        </h1>
+        
+        <div class="btn-container">
+            <button class="action-button" data-type="sad">мне грустненько 😔</button>
+            <button class="action-button" data-type="miss">я скучаю 🥹</button>
+            <button class="action-button" data-type="nightmare">мне приснился кошмар 😭</button>
+        </div>
+    </div>
+
+    <div id="response-screen">
+        <div class="response-box">
+            <p id="response-text"></p>
+            <button id="back-button">Назад ❤️</button>
+        </div>
+    </div>
+    
+    <div id="landscape-message">
+        <p>В горизонтальне положення ми будемо лежати увві сні — поверни догори :) 🌙</p>
+    </div>
+
+    <script>
+        // === КОНФІГУРАЦІЯ ТЕКСТІВ ПІДТРИМКИ ===
+        const SUPPORT_MESSAGES = {
+            sad: "Моє сонечко, не сумуй! Я тут, я обіймаю тебе міцно-міцно через екран. Знаєш, навіть найлегша хмаринка іноді плаче дощем, але потім завжди виходить сонечко. Ти моя найкраща, я тебе люблю! 🥰",
+            miss: "Я теж шалено скучаю за тобою, моє кошенятко! Кожна секунда без тебе здається вічністю. Але пам'ятай: ти — це мій дім, моє тепло, моє все. Дуже скоро ми будемо разом! 🫂",
+            nightmare: "Ти в безпеці, моя мила. Це був просто дурний сон, він не має жодної сили над тобою. Відчуй мої обійми і тепло. Подумай про щось гарне, наприклад, про наші майбутні подорожі чи про те, як ми будемо сміятися. Просто дихай. Все добре. ✨"
+        };
+
+        // === ЕЛЕМЕНТИ DOM ===
+        const mainContent = document.getElementById('main-content');
+        const responseScreen = document.getElementById('response-screen');
+        const responseText = document.getElementById('response-text');
+        const backButton = document.getElementById('back-button');
+        const landscapeMessage = document.getElementById('landscape-message');
+        const actionButtons = document.querySelectorAll('.action-button');
+        const body = document.body;
+
+        // === ФУНКЦІЇ ДЛЯ ЛОГІКИ ===
+
+        /**
+         * Обробляє натискання на кнопку.
+         * @param {string} type - Тип повідомлення ('sad', 'miss', 'nightmare').
+         */
+        function handleButtonClick(type) {
+            const message = SUPPORT_MESSAGES[type];
+            if (!message) return;
+
+            // 1. Приховуємо основний контент
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'scale(0.95)';
+
+            // 2. Встановлюємо текст і показуємо екран підтримки
+            setTimeout(() => {
+                responseText.textContent = message;
+                responseScreen.classList.add('active');
+                body.classList.add('glow'); // Додаємо ефект світіння на задньому плані
+            }, 500); // Чекаємо, поки зникне основний контент
+
+            // 3. Знімаємо ефект світіння через деякий час, щоб був плавний ефект
+            setTimeout(() => {
+                 body.classList.remove('glow');
+            }, 1000);
+        }
+
+        /**
+         * Повертає на головний екран.
+         */
+        function goBack() {
+            responseScreen.classList.remove('active');
+            
+            // 2. Показуємо основний контент
+            setTimeout(() => {
+                mainContent.style.opacity = '1';
+                mainContent.style.transform = 'scale(1)';
+            }, 500); // Чекаємо, поки зникне екран підтримки
+        }
+
+        /**
+         * Перевіряє орієнтацію екрана і показує пасхалку.
+         */
+        function checkOrientation() {
+            // Перевіряємо, чи ширина більша за висоту (тобто Landscape)
+            if (window.innerWidth > window.innerHeight) {
+                // Приховуємо main content і response screen
+                mainContent.style.display = 'none';
+                responseScreen.classList.remove('active');
+                
+                // Показуємо пасхалку
+                landscapeMessage.classList.add('active');
+            } else {
+                // Portrait
+                landscapeMessage.classList.remove('active');
+                // Якщо ми не на екрані відповіді, показуємо main content
+                if (!responseScreen.classList.contains('active')) {
+                     mainContent.style.display = 'flex';
+                }
+            }
+        }
+
+        // === ДОДАВАННЯ СЛУХАЧІВ ПОДІЙ ===
+
+        // 1. Кліки по кнопках
+        actionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                handleButtonClick(button.dataset.type);
+            });
+        });
+
+        // 2. Кнопка "Назад"
+        backButton.addEventListener('click', goBack);
+
+        // 3. Відстеження зміни орієнтації
+        window.addEventListener('orientationchange', checkOrientation);
+        window.addEventListener('resize', checkOrientation);
+        
+        // Початкова перевірка при завантаженні сторінки
+        window.onload = () => {
+             checkOrientation();
+        };
+
+    </script>
+</body>
+</html>
